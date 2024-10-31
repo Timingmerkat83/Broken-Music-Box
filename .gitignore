@@ -1,0 +1,72 @@
+# General
+*.log
+*.tmp
+*.DS_Store
+Thumbs.db
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+Desktop.ini
+
+# Arduino
+*.hex
+*.elf
+*.bin
+*.eep
+*.out
+*.o
+*.d
+*.bak
+*.suo
+*.bin
+*.a
+build/
+
+# Max/MSP
+*.maxpat.bak
+*.mxb
+*.mxf
+*.json
+*/.MaxBackup*
+
+# TouchDesigner
+*.toe.bak
+*.tox.bak
+*.toxbak
+
+# Reaper
+*.RPP-bak
+*.bak
+*.rpp~
+*.reapeaks/
+
+# Audio/Video Cache files
+*.wav
+*.mp3
+*.ogg
+*.mp4
+*.mov
+*.aif
+*.aiff
+
+# OS-specific temporary files
+*.swp
+*.swo
+*.tmp
+._*
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+
+# Python (if used for scripting)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
