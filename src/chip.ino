@@ -12,7 +12,7 @@
 Adafruit_MPR121 cap = Adafruit_MPR121();
 MicroOscSlip<128> monOsc(&Serial);  // OSC communication over Serial
 
-// Keeps track of the last pins touched
+// Keeps track of the lasts pins touched
 uint16_t lasttouched = 0;
 uint16_t currtouched = 0;
 
