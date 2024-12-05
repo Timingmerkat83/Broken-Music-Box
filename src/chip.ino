@@ -33,21 +33,13 @@ void setup() {
   }
   // Serial.println("MPR121 found!");
 }
-void touchdetector(char * addr,int i){
-   if ((currtouched & _BV(i)) && !(lasttouched & _BV(i))) {
-      monOsc.sendInt(addr, 1);
-    }
-    else if (!(currtouched & _BV(i)) && (lasttouched & _BV(i))) {
-      monOsc.sendInt(addr, 0);
-    }
-}
+
 void loop() {
   // Get the current touch state of the MPR121
   currtouched = cap.touched();
-  touchdetector("/touch0", 0);
 
   // Check each of the 12 touch inputs
- /* for (uint8_t i = 0; i < 12; i++) {
+  for (uint8_t i = 0; i < 12; i++) {
     // If a pad is touched now but wasn't before
     if ((currtouched & _BV(i)) && !(lasttouched & _BV(i))) {
       // Send a touch event via OSC
@@ -58,11 +50,9 @@ void loop() {
       monOsc.sendInt("/release", i); // "/release" message with the pad index
       // Serial.print(i); Serial.println(" released");
     }
-
-  }*/
+  }
   // Update the last touch state
   lasttouched = currtouched;
   // Add a small delay for stability
-  delay(20);
+  delay(10);
 }
-
