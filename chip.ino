@@ -1,88 +1,58 @@
 //Code par PL
-/*********************************************************
-This is a library for the MPR121 12-channel Capacitive touch sensor
-
-Designed specifically to work with the MPR121 Breakout in the Adafruit shop 
-  ----> https://www.adafruit.com/products/
-
-These sensors use I2C communicate, at least 2 pins are required 
-to interface
-
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
-
-Written by Limor Fried/Ladyada for Adafruit Industries.  
-BSD license, all text above must be included in any redistribution
-**********************************************************/
 
 #include <Wire.h>
 #include "Adafruit_MPR121.h"
+#include <MicroOscSlip.h>
 
 #ifndef _BV
 #define _BV(bit) (1 << (bit)) 
 #endif
 
-// You can have up to 4 on one i2c bus but one is enough for testing!
+// Create an instance of the MPR121 and OSC library
 Adafruit_MPR121 cap = Adafruit_MPR121();
+MicroOscSlip<128> monOsc(&Serial);  // OSC communication over Serial
 
 // Keeps track of the last pins touched
-// so we know when buttons are 'released'
 uint16_t lasttouched = 0;
 uint16_t currtouched = 0;
 
 void setup() {
-  Serial.begin(9600);
-
-  while (!Serial) { // needed to keep leonardo/micro from starting too fast!
-    delay(10);
+  // Initialize serial communication for debugging and OSC
+  Serial.begin(115200); // Match this baud rate in TouchDesigner
+  
+  while (!Serial) { 
+    delay(10); // Wait for serial to initialize
   }
   
-  Serial.println("Adafruit MPR121 Capacitive Touch sensor test"); 
+  // Serial.println("Adafruit MPR121 Capacitive Touch sensor test");
   
-  // Default address is 0x5A, if tied to 3.3V its 0x5B
-  // If tied to SDA its 0x5C and if SCL then 0x5D
-  if (!cap.begin(0x5A)) {
-    Serial.println("MPR121 not found, check wiring?");
-    while (1);
+  // Initialize the MPR121 with its I2C address
+  if (!cap.begin(0x5A)) { // Default I2C address of MPR121
+    // Serial.println("MPR121 not found, check wiring?");
+    while (1); // Halt execution if sensor is not found
   }
-  Serial.println("MPR121 found!");
+  // Serial.println("MPR121 found!");
 }
 
 void loop() {
-  // Get the currently touched pads
+  // Get the current touch state of the MPR121
   currtouched = cap.touched();
-  
-  for (uint8_t i=0; i<12; i++) {
-    // it if *is* touched and *wasnt* touched before, alert!
-    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
-      Serial.print(i); Serial.println(" touched");
+
+  // Check each of the 12 touch inputs
+  for (uint8_t i = 0; i < 12; i++) {
+    // If a pad is touched now but wasn't before
+    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i))) {
+      // Send a touch event via OSC
+      monOsc.sendInt("/touch", i); // "/touch" message with the pad index
+      // Serial.print(i); Serial.println(" touched");
     }
-    // if it *was* touched and now *isnt*, alert!
-    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
-      Serial.print(i); Serial.println(" released");
+    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i))) {
+      monOsc.sendInt("/release", i); // "/release" message with the pad index
+      // Serial.print(i); Serial.println(" released");
     }
   }
-
-  // reset our state
+  // Update the last touch state
   lasttouched = currtouched;
-
-  // comment out this line for detailed data from the sensor!
-  return;
-  
-  // debugging info, what
-  Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x"); Serial.println(cap.touched(), HEX);
-  Serial.print("Filt: ");
-  for (uint8_t i=0; i<12; i++) {
-    Serial.print(cap.filteredData(i)); Serial.print("\t");
-  }
-  Serial.println();
-  Serial.print("Base: ");
-  for (uint8_t i=0; i<12; i++) {
-    Serial.print(cap.baselineData(i)); Serial.print("\t");
-  }
-  Serial.println();
-  
-  // put a delay so it isn't overwhelming
-  delay(100);
+  // Add a small delay for stability
+  delay(10);
 }
