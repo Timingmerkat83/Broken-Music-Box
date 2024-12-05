@@ -43,6 +43,18 @@ void loop() {
   // Get the current touch state of the MPR121
   currtouched = cap.touched();
   touchdetector("/touch0", 0);
+  touchdetector("/touch1", 1);
+  touchdetector("/touch2", 2);
+  touchdetector("/touch3", 3);
+  touchdetector("/touch4", 4);
+  touchdetector("/touch5", 5);
+  touchdetector("/touch6", 6);
+  touchdetector("/touch7", 7);
+  touchdetector("/touch8", 8);
+  touchdetector("/touch9", 9);
+  touchdetector("/touch10", 10);
+  touchdetector("/touch11", 11);
+
 
   // Check each of the 12 touch inputs
  /* for (uint8_t i = 0; i < 12; i++) {
