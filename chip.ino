@@ -1,68 +1,88 @@
-#include <M5Atom.h>               // Include the M5Atom library
-#include <FastLED.h>              // Include FastLED library
-#include <MicroOscSlip.h>         // Include the MicroOsc library
+//Code par PL
+/*********************************************************
+This is a library for the MPR121 12-channel Capacitive touch sensor
 
-CRGB pixel;                       // Define the RGB LED pixel
-unsigned long monChronoMessages;  // Used to limit OSC message sending frequency
-#define MA_BROCHE_ANGLE 32        // Define the analog input pin
+Designed specifically to work with the MPR121 Breakout in the Adafruit shop 
+  ----> https://www.adafruit.com/products/
 
-// Define button pins
-#define BUTTON_1_PIN 26
-#define BUTTON_2_PIN 33
-#define BUTTON_3_PIN 25
+These sensors use I2C communicate, at least 2 pins are required 
+to interface
 
-MicroOscSlip<128> monOsc(&Serial);
+Adafruit invests time and resources providing this open source code, 
+please support Adafruit and open-source hardware by purchasing 
+products from Adafruit!
+
+Written by Limor Fried/Ladyada for Adafruit Industries.  
+BSD license, all text above must be included in any redistribution
+**********************************************************/
+
+#include <Wire.h>
+#include "Adafruit_MPR121.h"
+
+#ifndef _BV
+#define _BV(bit) (1 << (bit)) 
+#endif
+
+// You can have up to 4 on one i2c bus but one is enough for testing!
+Adafruit_MPR121 cap = Adafruit_MPR121();
+
+// Keeps track of the last pins touched
+// so we know when buttons are 'released'
+uint16_t lasttouched = 0;
+uint16_t currtouched = 0;
 
 void setup() {
-  M5.begin(false, false, false);                      // Initialize M5Atom without options
-  Serial.begin(115200);                               // Start the serial connection
-  FastLED.addLeds<WS2812, DATA_PIN, GRB>(&pixel, 1);  // Add M5Atom's pixel to FastLED
+  Serial.begin(9600);
 
-  // Set up buttons as input
-  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
-
-  // Startup animation
-  while (millis() < 4000) {
-    pixel = CRGB(255, 40, 0); // Red
-    FastLED.show();
-    delay(10);
-    pixel = CRGB(0, 255, 0); // Green
-    FastLED.show();
+  while (!Serial) { // needed to keep leonardo/micro from starting too fast!
     delay(10);
   }
-}
-
-void maReceptionMessageOsc(MicroOscMessage& oscMessage) {
-  if (oscMessage.checkOscAddress("/rgb")) {
-    int r = oscMessage.nextAsInt();
-    int g = oscMessage.nextAsInt();
-    int b = oscMessage.nextAsInt();
-    pixel = CRGB(r, g, b);
-    FastLED.show();
+  
+  Serial.println("Adafruit MPR121 Capacitive Touch sensor test"); 
+  
+  // Default address is 0x5A, if tied to 3.3V its 0x5B
+  // If tied to SDA its 0x5C and if SCL then 0x5D
+  if (!cap.begin(0x5A)) {
+    Serial.println("MPR121 not found, check wiring?");
+    while (1);
   }
+  Serial.println("MPR121 found!");
 }
 
 void loop() {
-  M5.update();  // Always include M5.update() at the start of the loop
-  monOsc.onOscMessageReceived(maReceptionMessageOsc);
-
-  if (millis() - monChronoMessages >= 40) {
-    monChronoMessages = millis();  // Reset the timer
-
-    // Read the button states
-    int button1State = digitalRead(BUTTON_1_PIN) == LOW ? 1 : 0;
-    int button2State = digitalRead(BUTTON_2_PIN) == LOW ? 1 : 0;
-    int button3State = digitalRead(BUTTON_3_PIN) == LOW ? 1 : 0;
-
-    // Read the potentiometer value
-    int maLectureAngle = analogRead(MA_BROCHE_ANGLE);
-
-    // Send OSC messages
-    monOsc.sendInt("/pot", maLectureAngle);
-    monOsc.sendInt("/button1", button1State);
-    monOsc.sendInt("/button2", button2State);
-    monOsc.sendInt("/button3", button3State);
+  // Get the currently touched pads
+  currtouched = cap.touched();
+  
+  for (uint8_t i=0; i<12; i++) {
+    // it if *is* touched and *wasnt* touched before, alert!
+    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
+      Serial.print(i); Serial.println(" touched");
+    }
+    // if it *was* touched and now *isnt*, alert!
+    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
+      Serial.print(i); Serial.println(" released");
+    }
   }
+
+  // reset our state
+  lasttouched = currtouched;
+
+  // comment out this line for detailed data from the sensor!
+  return;
+  
+  // debugging info, what
+  Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t 0x"); Serial.println(cap.touched(), HEX);
+  Serial.print("Filt: ");
+  for (uint8_t i=0; i<12; i++) {
+    Serial.print(cap.filteredData(i)); Serial.print("\t");
+  }
+  Serial.println();
+  Serial.print("Base: ");
+  for (uint8_t i=0; i<12; i++) {
+    Serial.print(cap.baselineData(i)); Serial.print("\t");
+  }
+  Serial.println();
+  
+  // put a delay so it isn't overwhelming
+  delay(100);
 }
