@@ -732,8 +732,8 @@
 #X msg 1149 881 connect localhost 8002;
 #X msg 1930 922 connect localhost 8003;
 #X msg 162 359 baud 115200 \, devicename COM5;
-#X msg 1071 386 baud 115200 \, devicename COM6;
-#X msg 1995 394 baud 115200 \, devicename COM7;
+#X msg 1071 386 baud 115200 \, devicename COM7;
+#X msg 1995 394 baud 115200 \, devicename COM8;
 #X connect 6 0 18 0;
 #X connect 10 0 18 0;
 #X connect 13 0 117 0;
