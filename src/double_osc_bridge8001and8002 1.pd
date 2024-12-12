@@ -731,12 +731,12 @@
 #X obj 1917 130 netreceive -u -b 8000;
 #X msg 1149 881 connect localhost 8002;
 #X msg 1930 922 connect localhost 8003;
-#X msg 162 359 baud 115200 \, devicename COM5;
-#X msg 1071 386 baud 115200 \, devicename COM7;
-#X msg 1995 394 baud 115200 \, devicename COM8;
+#X msg 1071 386 baud 115200 \, devicename COM5;
+#X msg 162 359 baud 115200 \, devicename COM6;
+#X msg 1995 394 baud 115200 \, devicename COM7;
 #X connect 6 0 18 0;
 #X connect 10 0 18 0;
-#X connect 13 0 117 0;
+#X connect 13 0 118 0;
 #X connect 16 0 37 0;
 #X connect 17 0 23 0;
 #X connect 18 0 34 0;
@@ -757,7 +757,7 @@
 #X connect 37 0 23 0;
 #X connect 44 0 56 0;
 #X connect 48 0 56 0;
-#X connect 51 0 118 0;
+#X connect 51 0 117 0;
 #X connect 54 0 115 0;
 #X connect 55 0 61 0;
 #X connect 56 0 72 0;
@@ -803,6 +803,6 @@
 #X connect 114 0 89 0;
 #X connect 115 0 61 0;
 #X connect 116 0 98 0;
-#X connect 117 0 18 0;
-#X connect 118 0 56 0;
+#X connect 117 0 56 0;
+#X connect 118 0 18 0;
 #X connect 119 0 93 0;
